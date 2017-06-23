@@ -374,8 +374,24 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
             }
             if (picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
                 data = [self taggedImageData:data metadata:[info valueForKey:UIImagePickerControllerMediaMetadata] orientation:image.imageOrientation];
+                 [data writeToFile:path atomically:YES];
+            }else {
+                ALAssetsLibrary *assetLibrary=[[ALAssetsLibrary alloc] init];
+                [assetLibrary assetForURL:imageURL resultBlock:^(ALAsset *asset) {
+                    ALAssetRepresentation *rep = [asset defaultRepresentation];
+                    Byte *buffer = (Byte*)malloc(rep.size);
+                    NSUInteger buffered = [rep getBytes:buffer fromOffset:0.0 length:rep.size error:nil];
+                    NSData *data1 = [NSData dataWithBytesNoCopy:buffer length:buffered freeWhenDone:YES];
+                    CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)data1, NULL);
+                    NSDictionary* metadata = (__bridge NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source,0,NULL);
+                    NSData *bData = [self taggedImageData:data metadata:metadata orientation:image.imageOrientation];
+                    [bData writeToFile:path atomically:YES];
+                } failureBlock:^(NSError *err) {
+                    NSLog(@"Error: %@",[err localizedDescription]);
+                    [data writeToFile:path atomically:YES];
+                }];
             }
-            [data writeToFile:path atomically:YES];
+           
 
             if (![[self.options objectForKey:@"noData"] boolValue]) {
                 NSString *dataString = [data base64EncodedStringWithOptions:0]; // base64 encoded image string
