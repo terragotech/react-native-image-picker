@@ -525,7 +525,16 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
                 [[storageOptions objectForKey:@"cameraRoll"] boolValue] == NO ||
                 self.picker.sourceType != UIImagePickerControllerSourceTypeCamera)
             {
-                self.callback(@[self.response]);
+                if ([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
+                    if (picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
+                        self.callback(@[self.response]);
+                    } else if(isCompleted) {
+                        self.callback(@[self.response]);
+                    }
+                    isCompleted = TRUE;
+                } else {
+                    self.callback(@[self.response]);
+                }
             }
         }
         else {
