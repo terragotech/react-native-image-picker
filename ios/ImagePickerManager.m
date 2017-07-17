@@ -6,7 +6,7 @@
 
 @import MobileCoreServices;
 
-@interface ImagePickerManager ()
+@interface ImagePickerManager ()<UIAlertViewDelegate>
 
 @property (nonatomic, strong) UIAlertController *alertController;
 @property (nonatomic, strong) UIImagePickerController *picker;
@@ -23,12 +23,22 @@ RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(launchCamera:(NSDictionary *)options callback:(RCTResponseSenderBlock)callback)
 {
+    AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    if(authStatus == AVAuthorizationStatusDenied){
+        [self camDenied];
+        return;
+    }
     self.callback = callback;
     [self launchImagePicker:RNImagePickerTargetCamera options:options];
 }
 
 RCT_EXPORT_METHOD(launchImageLibrary:(NSDictionary *)options callback:(RCTResponseSenderBlock)callback)
 {
+    ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
+    if(status == AVAuthorizationStatusDenied){
+        [self camDenied];
+        return;
+    }
     self.callback = callback;
     [self launchImagePicker:RNImagePickerTargetLibrarySingleImage options:options];
 }
@@ -805,5 +815,57 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
     NSData *newImageData = [self writeMetadataIntoImageData:imageData metadata:newMetadata];
     return newImageData;
 }
+
+- (void)camDenied
+{
+    NSLog(@"%@", @"Denied camera access");
+    
+    NSString *alertText;
+    NSString *alertButton;
+    
+    BOOL canOpenSettings = (&UIApplicationOpenSettingsURLString != NULL);
+    if (canOpenSettings)
+    {
+        alertText = @"It looks like your privacy settings are preventing us from accessing your camera to do barcode scanning. You can fix this by doing the following:\n1. Touch the Go button below to open the Settings app.\n2. Touch Privacy.\n3. Turn the Camera on.\n4. Open this app and try again.";
+        
+        alertButton = @"Go";
+    }
+    else
+    {
+        alertText = @"It looks like your privacy settings are preventing us from accessing your camera to do barcode scanning. You can fix this by doing the following:\n1. Close this app.\n2. Open the Settings app.\n3. Scroll to the bottom and select this app in the list.\n4. Touch Privacy.\n5. Turn the Camera on.\n6. Open this app and try again.";
+        
+        alertButton = @"OK";
+    }
+    
+    UIAlertView *alert = [[UIAlertView alloc]
+                          initWithTitle:@"Error"
+                          message:alertText
+                          delegate:self
+                          cancelButtonTitle:alertButton
+                          otherButtonTitles:nil];
+    if (canOpenSettings) {
+        alert = [[UIAlertView alloc]
+                 initWithTitle:@"Error"
+                 message:alertText
+                 delegate:self
+                 cancelButtonTitle:alertButton
+                 otherButtonTitles:@"Cancel", nil];
+    }
+    alert.tag = 111073;
+    dispatch_async(dispatch_get_main_queue(), ^(void)
+                   {
+                       [alert show];
+                   });
+}
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 111073 && buttonIndex==0)
+    {
+        BOOL canOpenSettings = (&UIApplicationOpenSettingsURLString != NULL);
+        if (canOpenSettings)
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }
+}
+
 
 @end
