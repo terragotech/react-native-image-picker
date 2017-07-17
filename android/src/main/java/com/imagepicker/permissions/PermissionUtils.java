@@ -26,11 +26,17 @@ public class PermissionUtils
         {
             return null;
         }
-        final ReadableMap permissionDenied = options.getMap("permissionDenied");
-        final String title = permissionDenied.getString("title");
-        final String text = permissionDenied.getString("text");
-        final String btnReTryTitle = permissionDenied.getString("reTryTitle");
-        final String btnOkTitle = permissionDenied.getString("okTitle");
+        String title = "Title";
+        String text = "text";
+        String btnReTryTitle = "Retry";
+        String btnOkTitle = "Ok";
+        if(options.hasKey("permissionDenied")) {
+            final ReadableMap permissionDenied = options.getMap("permissionDenied");
+            title = permissionDenied.getString("title");
+            text = permissionDenied.getString("text");
+            btnReTryTitle = permissionDenied.getString("reTryTitle");
+            btnOkTitle = permissionDenied.getString("okTitle");
+        }
         final WeakReference<ImagePickerModule> reference = new WeakReference<>(module);
 
         final Activity activity = module.getActivity();
