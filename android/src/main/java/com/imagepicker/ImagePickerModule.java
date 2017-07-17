@@ -207,6 +207,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
   @ReactMethod
   public void launchCamera(final ReadableMap options, final Callback callback)
   {
+    this.options = options;
+    this.callback = callback;
+
     if (!isCameraAvailable())
     {
       responseHelper.invokeError(callback, "Camera not available");
@@ -219,8 +222,6 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       responseHelper.invokeError(callback, "can't find current Activity");
       return;
     }
-
-    this.options = options;
 
     if (!permissionsCheck(currentActivity, callback, REQUEST_PERMISSIONS_FOR_CAMERA))
     {
@@ -264,8 +265,6 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       responseHelper.invokeError(callback, "Cannot launch camera");
       return;
     }
-
-    this.callback = callback;
 
     try
     {
