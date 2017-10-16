@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.util.UUID;
 
 import com.facebook.react.modules.core.PermissionListener;
 
@@ -301,18 +302,16 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     parseOptions(this.options);
 
     int requestCode;
-    Intent libraryIntent;
+    Intent libraryIntent = new Intent(Intent.ACTION_GET_CONTENT, null);;
     if (pickVideo)
     {
       requestCode = REQUEST_LAUNCH_VIDEO_LIBRARY;
-      libraryIntent = new Intent(Intent.ACTION_PICK);
       libraryIntent.setType("video/*");
     }
     else
     {
       requestCode = REQUEST_LAUNCH_IMAGE_LIBRARY;
-      libraryIntent = new Intent(Intent.ACTION_PICK,
-      MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+      libraryIntent.setType("image/*");
     }
 
     if (libraryIntent.resolveActivity(reactContext.getPackageManager()) == null)
@@ -325,6 +324,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
     try
     {
+      libraryIntent.addCategory(Intent.CATEGORY_OPENABLE);
       currentActivity.startActivityForResult(libraryIntent, requestCode);
     }
     catch (ActivityNotFoundException e)
@@ -369,7 +369,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
         {
           try
           {
-            File file = createFileFromURI(uri);
+            File file = createFileFromURI(uri, true);
             realPath = file.getAbsolutePath();
             uri = Uri.fromFile(file);
           }
@@ -388,7 +388,16 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
       case REQUEST_LAUNCH_VIDEO_LIBRARY:
         responseHelper.putString("uri", data.getData().toString());
-        responseHelper.putString("path", getRealPathFromURI(data.getData()));
+        String videoPath = getRealPathFromURI(data.getData());
+        if(videoPath == null){
+          try {
+            File videoFile = createFileFromURI(data.getData(),false);
+            videoPath = videoFile.getPath();
+          }catch (Exception e){
+            e.printStackTrace();
+          }
+        }
+        responseHelper.putString("path", videoPath == null ? "" : videoPath);
         responseHelper.invokeResponse(callback);
         callback = null;
         return;
@@ -573,8 +582,8 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
    * @return File
    * @throws Exception
    */
-  private File createFileFromURI(Uri uri) throws Exception {
-    File file = new File(reactContext.getExternalCacheDir(), "photo-" + uri.getLastPathSegment());
+  private File createFileFromURI(Uri uri,boolean isPhoto) throws Exception {
+    File file = new File(reactContext.getExternalCacheDir(), isPhoto ? "photo-" + uri.getLastPathSegment() : UUID.randomUUID().toString() + ".mp4");
     InputStream input = reactContext.getContentResolver().openInputStream(uri);
     OutputStream output = new FileOutputStream(file);
 
