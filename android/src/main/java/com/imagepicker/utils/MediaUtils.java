@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReadableMap;
 import com.imagepicker.ImagePickerModule;
 import com.imagepicker.ResponseHelper;
@@ -55,6 +56,32 @@ public class MediaUtils
         try
         {
             path.mkdirs();
+            result.createNewFile();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            result = null;
+        }
+
+        return result;
+    }
+
+    public static @Nullable File createNewFileForImg(@NonNull final Context reactContext,
+                                                     @NonNull final ReadableMap options,
+                                                     @NonNull final boolean forceLocal, ReactApplicationContext reactApplicationContext)
+    {
+
+
+        String folderPath = reactApplicationContext.getFilesDir().getAbsolutePath()+"/TEMP_RESOURCES/";
+        File folder = new File(folderPath);
+        final String filename = UUID.randomUUID().toString()+".jpg";
+
+        File result = new File(folder, filename);
+
+        try
+        {
+            folder.mkdirs();
             result.createNewFile();
         }
         catch (IOException e)

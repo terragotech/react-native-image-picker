@@ -249,7 +249,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       requestCode = REQUEST_LAUNCH_IMAGE_CAPTURE;
       cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-      final File original = createNewFile(reactContext, this.options, false);
+      final File original = createNewFileForImg(reactContext, this.options, false, this.getReactApplicationContext());
       imageConfig = imageConfig.withOriginalFile(original);
 
       cameraCaptureURI = RealPathUtil.compatUriFromFile(reactContext, imageConfig.original);
