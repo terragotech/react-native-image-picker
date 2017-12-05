@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -519,7 +520,10 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     responseHelper.putString("path", path);
 
     if (!noData) {
-      responseHelper.putString("data", getBase64StringFromFile(path));
+      String data = getBase64StringFromFile(path);
+      if(data != null) {
+        responseHelper.putString("data", data);
+      }
     }
 
     putExtraFileInfo(path, responseHelper);
@@ -622,7 +626,23 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
       e.printStackTrace();
     }
     bytes = output.toByteArray();
-    return Base64.encodeToString(bytes, Base64.NO_WRAP);
+    try {
+      return Base64.encodeToString(bytes, Base64.NO_WRAP);
+    }catch (Exception e){// if it is out off memory exception reduce image quality
+      e.printStackTrace();
+      try {
+        output.reset();
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2;
+        Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath, options);
+        bitmap.compress(Bitmap.CompressFormat.JPEG,50,output);
+        bytes = output.toByteArray();
+        return Base64.encodeToString(bytes, Base64.NO_WRAP);
+      }catch (Exception e1){
+        e1.printStackTrace();
+      }
+    }
+    return null;
   }
 
   private void putExtraFileInfo(@NonNull final String path,
