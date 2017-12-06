@@ -587,7 +587,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
    * @throws Exception
    */
   private File createFileFromURI(Uri uri,boolean isPhoto) throws Exception {
-    File file = new File(reactContext.getExternalCacheDir(), isPhoto ? "photo-" + uri.getLastPathSegment() : UUID.randomUUID().toString() + ".mp4");
+    File file = new File(reactContext.getExternalCacheDir(), isPhoto ? "photo-" + UUID.randomUUID().toString() + ".jpg" : UUID.randomUUID().toString() + ".mp4");
     InputStream input = reactContext.getContentResolver().openInputStream(uri);
     OutputStream output = new FileOutputStream(file);
 
