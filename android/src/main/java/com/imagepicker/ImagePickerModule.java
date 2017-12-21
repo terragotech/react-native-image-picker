@@ -607,18 +607,12 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
   }
 
   private String getBase64StringFromFile(String absoluteFilePath) {
-    InputStream inputStream = null;
-    try {
-      inputStream = new FileInputStream(new File(absoluteFilePath));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
     byte[] bytes;
     byte[] buffer = new byte[8192];
     int bytesRead;
     ByteArrayOutputStream output = new ByteArrayOutputStream();
     try {
+      InputStream inputStream = new FileInputStream(new File(absoluteFilePath));
       while ((bytesRead = inputStream.read(buffer)) != -1) {
         output.write(buffer, 0, bytesRead);
       }
