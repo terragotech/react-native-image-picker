@@ -3,12 +3,14 @@ package com.imagepicker;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -588,7 +590,16 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
    */
   private File createFileFromURI(Uri uri,boolean isPhoto) throws Exception {
     File file = new File(reactContext.getExternalCacheDir(), isPhoto ? "photo-" + UUID.randomUUID().toString() + ".jpg" : UUID.randomUUID().toString() + ".mp4");
-    InputStream input = reactContext.getContentResolver().openInputStream(uri);
+    ContentResolver cr = reactContext.getContentResolver();
+    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      try {
+        cr.takePersistableUriPermission(uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION);// Reference: http://book2s.com/java/api/android/content/contentresolver/takepersistableuripermission-2.html
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    InputStream input = cr.openInputStream(uri);
     OutputStream output = new FileOutputStream(file);
 
     try {
