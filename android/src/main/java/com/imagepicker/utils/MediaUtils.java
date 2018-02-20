@@ -192,7 +192,7 @@ public class MediaUtils
 
         result = result.withResizedFile(resized);
 
-        FileOutputStream fos;
+        FileOutputStream fos = null;
         try
         {
             fos = new FileOutputStream(result.resized);
@@ -204,7 +204,13 @@ public class MediaUtils
         }
         finally
         {
-            fos.close();
+            if(fos != null) {
+                try{
+                    fos.close();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
 
         if (photo != null)
