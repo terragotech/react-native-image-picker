@@ -202,6 +202,10 @@ public class MediaUtils
         {
             e.printStackTrace();
         }
+        finally
+        {
+            fos.close();
+        }
 
         if (photo != null)
         {
