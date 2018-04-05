@@ -621,7 +621,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     byte[] bytes;
     byte[] buffer = new byte[8192];
     int bytesRead;
-    InputStream inputStream;
+    InputStream inputStream = null;
     ByteArrayOutputStream output = new ByteArrayOutputStream();
     try {
       inputStream = new FileInputStream(new File(absoluteFilePath));
@@ -642,17 +642,17 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     bytes = output.toByteArray();
     try {
       return Base64.encodeToString(bytes, Base64.NO_WRAP);
-    }catch (Exception e){// if it is out off memory exception reduce image quality
+    }catch (Exception e) {// if it is out off memory exception reduce image quality
       e.printStackTrace();
       try {
         output.reset();
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 2;
         Bitmap bitmap = BitmapFactory.decodeFile(absoluteFilePath, options);
-        bitmap.compress(Bitmap.CompressFormat.JPEG,50,output);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, output);
         bytes = output.toByteArray();
         return Base64.encodeToString(bytes, Base64.NO_WRAP);
-      }catch (Exception e1){
+      } catch (Exception e1) {
         e1.printStackTrace();
       }
     }
