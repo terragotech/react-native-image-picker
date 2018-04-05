@@ -621,14 +621,23 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
     byte[] bytes;
     byte[] buffer = new byte[8192];
     int bytesRead;
+    InputStream inputStream;
     ByteArrayOutputStream output = new ByteArrayOutputStream();
     try {
-      InputStream inputStream = new FileInputStream(new File(absoluteFilePath));
+      inputStream = new FileInputStream(new File(absoluteFilePath));
       while ((bytesRead = inputStream.read(buffer)) != -1) {
         output.write(buffer, 0, bytesRead);
       }
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      if (inputStream != null) {
+        try {
+          inputStream.close();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
     bytes = output.toByteArray();
     try {
