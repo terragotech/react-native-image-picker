@@ -375,16 +375,20 @@ public class MediaUtils
 
             oldFile.delete();
         }
-        finally
-        {
-            try
-            {
-                if (oldChannel != null) oldChannel.close();
-                if (newChannel != null) newChannel.close();
+        finally {
+            if (oldChannel != null) {
+                try {
+                    oldChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            catch (IOException e)
-            {
-                e.printStackTrace();
+            if (newChannel != null) {
+                try {
+                    newChannel.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
